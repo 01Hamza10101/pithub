@@ -2,6 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import MenuIcon from "@/app/components/icons/icon-menu.svg";
 import CancelIcon from "@/app/components/icons/icon-cancel.svg";
@@ -10,17 +11,27 @@ import SettingIcon from "@/app/components/icons/icon-setting.svg";
 import SignoutIcon from "@/app/components/icons/icon-signout.svg";
 import AddIcon from "@/app/components/icons/icon-Add.svg";
 import StarIcon from "@/app/components/icons/icon-star.svg";
-
+import ProfilceSvg from "@/public/Profile.svg";
+import { useSelector } from "react-redux";
 
 export default function Header() {
   const [isMenuOpenLeft, setIsMenuOpenLeft] = useState(false);
   const [isMenuOpenRight, setIsMenuOpenRight] = useState(false);
+  const router = useRouter();
+  const {profile} = useSelector((state) => state.User.user);
 
+  const Logout = () => {
+    localStorage.removeItem("token"); // Remove the token from local storage
+    router.push("/login");
+    // Perform logout logic here, such as clearing tokens or redirecting to the login page
+    console.log("Logout clicked");
+    // Redirect to the login page or perform any other action
+  }
   return (
     <header className="bg-gray-900 z-10 text-white">
       {/* Menu Bar  Left Menu Bar*/}
       <div
-        className={`h-screen absolute z-10 bg-gray-900 shadow-gray-700 shadow-xl ${
+        className={`h-screen absolute z-10 bg-gray-900 shadow-gray-800 shadow-xl ${
           isMenuOpenLeft ? "min-w-72 px-4" : "w-0 overflow-hidden"
         }`}
       >
@@ -35,7 +46,7 @@ export default function Header() {
           </div>
         </div>
         <div className="flex p-2 hover:bg-gray-700 rounded-md cursor-pointer">
-          <div className="w-4 h-4 bg-slate-300 rounded-full"></div>
+          <div className="w-4 h-4 bg-gray-300 rounded-full"></div>
           <div className="text-sm ml-2">01Hamza10101/EarnRewards</div>
         </div>
       </div>
@@ -93,10 +104,15 @@ export default function Header() {
               </svg>
               {/* <Image src={AddIcon} width={32} height={32} alt='new Repo'/> */}
             </Link>
-            <div
-              className="w-8 h-8 bg-white rounded-full cursor-pointer"
-              onClick={() => setIsMenuOpenRight(!isMenuOpenRight)}
-            ></div>
+            <div className="w-8 h-8 rounded-full cursor-pointer" onClick={() => setIsMenuOpenRight(!isMenuOpenRight)}>
+              <Image
+                src={profile?.url ? profile.url : ProfilceSvg}
+                alt="User profile"
+                width={32}
+                height={32}
+                className="rounded-full cursor-pointer"
+              />
+            </div>
             {/* <Image
               src="/placeholder.svg"
               alt="User profile"
@@ -168,7 +184,7 @@ export default function Header() {
       )} */}
       {/* Menu bar Right */}
       <div
-        className={`h-screen z-10 absolute top-0 right-0 bg-gray-900 shadow-gray-700 shadow-2xl ${
+        className={`h-screen z-10 absolute top-0 right-0 bg-gray-900 shadow-gray-800 shadow-xl ${
           isMenuOpenRight ? "min-w-72 px-4" : "w-0 overflow-hidden"
         }`}
       >
@@ -200,7 +216,7 @@ export default function Header() {
           </div>
           <div className="text-sm ml-2">Setting</div>
         </Link>
-        <div className="flex p-2 hover:bg-gray-700 items-center rounded-md cursor-pointer">
+        <div className="flex p-2 hover:bg-gray-700 items-center rounded-md cursor-pointer" onClick={Logout} >
           <div className="w-5 h-5 rounded-full">
             <Image src={SignoutIcon} alt="Profile icon" />
           </div>

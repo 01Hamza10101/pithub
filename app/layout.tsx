@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
+import ClientLayout from "./client-layout"; // 👇 new client component
+
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -22,6 +25,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  
   return (
     <html lang="en">
       <head>
@@ -29,9 +33,9 @@ export default function RootLayout({
         {/* <link rel="icon" href="/image/icon.png" /> */}
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} scrollbar-hide antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} scrollbar-hide overflow-hidden antialiased`}
       >
-        {children}
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );

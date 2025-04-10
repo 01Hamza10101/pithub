@@ -23,6 +23,15 @@ body {
   scrollbar-width: none;
 }
 
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.scrollable {
+  height: 80vh;
+  overflow-y: auto;
+}
+
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }

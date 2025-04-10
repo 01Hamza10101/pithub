@@ -35,7 +35,7 @@ export async function GET(request) {
     if (Number(otp) === Number(StoredOtp)) {
       const newUser = new User({
         profile: {
-          url:'default.png',
+          url:'',
           username,
           email,
         },

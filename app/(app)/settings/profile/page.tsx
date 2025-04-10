@@ -1,6 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import Image from "next/image";
+import ProfileSvg from "@/public/Profile.svg";
+import PencilSvg from "@/app/components/icons/icon-pen.svg";
 
 export default function Page() {
   const [formData, setFormData] = useState<{
@@ -16,6 +20,23 @@ export default function Page() {
     pronouns: "Male",
     socialAccounts: ["", "", "", ""], // Initialize with 4 empty links
   });
+
+  const user = useSelector((state: any) => state.User.user);
+
+  useEffect(() => {
+    if (user) {
+      const isMale = user.profile.pronouns;
+      const isFemale = user.profile.pronouns;
+  
+      setFormData((prev) => ({
+        ...prev,
+        name: user.profile.name || prev.name,
+        email: user.profile.email || prev.email,
+        bio: user.profile.bio || prev.bio,
+        pronouns: isMale ? "Male" : !isFemale ? "Female" : prev.pronouns,
+        socialAccounts: user.activity.socialLinks || prev.socialAccounts,
+      }));
+    }}, [user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -135,7 +156,10 @@ export default function Page() {
       </div>
 
       {/* Image Section */}
-      <div className="w-32 h-32 lg:w-60 lg:h-60 bg-green-600 rounded-full"></div>
+      <div className="relative w-32 h-32 lg:w-60 lg:h-60 rounded-full">
+        <Image src={ProfileSvg} className="w-full h-full" alt="Profile" />
+        <Image src={PencilSvg} className="w-12 absolute top-0 right-0 hover:bg-gray-800 rounded-md hover:cursor-pointer" alt="Pencile" />
+      </div>
     </div>
   );
 }

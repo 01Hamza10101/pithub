@@ -2,36 +2,39 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useDispatch } from 'react-redux'
+import { useRouter } from 'next/navigation'
+import { CreateRepo } from '@/app/ReduxToolkit/ReduxSlice/User.Slice'
 
-interface FormData {
-  name: string
-  description: string
-  visibility: 'public' | 'private'
-  readme: boolean
-  gitignore: boolean
-  license: string
-}
 
 export default function NewRepositoryForm() {
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<any>({
     name: '',
     description: '',
-    visibility: 'public',
-    readme: true,
-    gitignore: false,
-    license: 'none'
+    status: 'public'
   })
+  const dispatch = useDispatch<any>();
+  const router = useRouter()
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    console.log('Form submitted:', formData)
-  }
+    e.preventDefault();
+    console.log('Form submitted:', formData);
+  
+    dispatch(CreateRepo(formData))
+      .unwrap()
+      .then((res: any) => {
+        router.push('/overview');
+      })
+      .catch((err: any) => {
+        const errorMessage = err.message || 'Failed to create repository.';
+      });
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value, type } = e.target
-    setFormData(prev => ({
+    setFormData((prev:any) => ({
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
     }))
@@ -55,7 +58,7 @@ export default function NewRepositoryForm() {
           required
           value={formData.name}
           onChange={handleChange}
-          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 bg-black focus:ring-blue-500"
+          className="w-full px-3 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-2 bg-black focus:ring-blue-500"
           placeholder="my-awesome-project"
         />
       </div>
@@ -71,20 +74,20 @@ export default function NewRepositoryForm() {
           value={formData.description}
           onChange={handleChange}
           rows={3}
-          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 bg-black focus:ring-blue-500"
+          className="w-full px-3 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-2 bg-black focus:ring-blue-500"
           placeholder="A short description of your repository"
         />
       </div>
 
-      {/* Visibility */}
-      <div className="space-y-4 border rounded-md p-4">
+      {/* status */}
+      <div className="space-y-4 border border-gray-700 rounded-md p-4">
         <div className="flex items-center space-x-3">
           <input
             type="radio"
             id="public"
-            name="visibility"
+            name="status"
             value="public"
-            checked={formData.visibility === 'public'}
+            checked={formData.status === 'public'}
             onChange={handleChange}
             className="h-4 w-4 text-blue-600 bg-black"
           />
@@ -103,9 +106,9 @@ export default function NewRepositoryForm() {
           <input
             type="radio"
             id="private"
-            name="visibility"
+            name="status"
             value="private"
-            checked={formData.visibility === 'private'}
+            checked={formData.status === 'private'}
             onChange={handleChange}
             className="h-4 w-4 text-blue-600"
           />
@@ -188,7 +191,7 @@ export default function NewRepositoryForm() {
       {/* <p className="text-sm text-gray-600">
         Learn more about{' '}
         <Link href="#" className="text-blue-600 hover:underline">
-          repository visibility
+          repository status
         </Link>
         {' '}and{' '}
         <Link href="#" className="text-blue-600 hover:underline">

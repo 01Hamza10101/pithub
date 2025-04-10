@@ -1,8 +1,12 @@
-import React from 'react';
+"use client"
+import React, { useEffect } from 'react';
 import Image from 'next/image';
 import LaptopIcon from '@/app/components/icons/icon-laptop.svg';
+import { useSelector } from 'react-redux';
 
 export default function Page() {
+  const sessions = useSelector((state: any) => state.User.user.security?.sessions || []);
+
   return (
     <div className="p-6">
       {/* Page Header */}
@@ -13,22 +17,24 @@ export default function Page() {
         </p>
       </div>
 
-      {/* Session Card */}
-      <div className="flex items-center justify-between max-w-md rounded-md border border-gray-500 mt-6 p-4 shadow-sm space-x-4">
-        {/* Session Indicator */}
-        <div className="flex-shrink-0 w-3 h-3 bg-green-700 rounded-full" title="Active Session"></div>
+      {
+        sessions?.map(({ ip ,location}: any, i: number) => {
 
-        {/* Session Icon */}
-        <div className="flex-shrink-0">
-          <Image src={LaptopIcon} alt="Laptop" width={32} height={32} />
-        </div>
+          return (
+            <div key={i} className="flex items-center justify-between max-w-md rounded-md border border-gray-500 mt-6 p-4 shadow-sm space-x-4">
+              <div className="flex-shrink-0 w-3 h-3 bg-green-700 rounded-full" title="Active Session"></div>
+              <div className="flex-shrink-0">
+                <Image src={LaptopIcon} alt="Laptop" width={32} height={32} />
+              </div>
+              <div className="flex-grow text-gray-200">
+                <div className="text-base font-medium">{location} {ip}</div>
+                {i == 0 ? (<div className="text-sm text-gray-400">Your current session</div>) : ""}
+              </div>
+            </div >
+          )
+        })
+      }
 
-        {/* Session Details */}
-        <div className="flex-grow text-gray-200">
-          <div className="text-base font-medium">Dhanbad 152.59.135.209</div>
-          <div className="text-sm text-gray-400">Your current session</div>
-        </div>
-      </div>
     </div>
   );
 }
