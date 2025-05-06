@@ -5,10 +5,8 @@ import ReduxProvider from '@/app/ReduxToolkit/ReduxProvider';
 import AuthWrapper from '@/app/components/comp/AuthWrapper';
 
 export default function layout({ children }: any) {
-    const [loadeduser, setLoadeduser] = useState(false);
-
     return (
-        <div className='min-h-screen scrollable scrollbar-hide'>
+        <div className='min-h-screen bg-gray-900 scrollable scrollbar-hide'>
             <ReduxProvider>
                 <AuthWrapper>
                     <Header />

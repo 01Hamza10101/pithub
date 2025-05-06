@@ -24,7 +24,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   }, [pathname, router]);
 
   if (loading) {
-    return <div className="min-h-screen flex justify-center items-center text-xl">Loading...</div>;
+    return <div className="min-h-screen flex justify-center items-center bg-gray-900 text-xl">Loading...</div>;
   }
 
   return (

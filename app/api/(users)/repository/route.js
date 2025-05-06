@@ -4,6 +4,7 @@ import Repository from '../../models/repository';
 import User from '../../models/user';
 import { NextResponse } from 'next/server';
 import { verifyTokenFromRequest } from '../../helper/VerifyToken';
+import { CreateFolder } from '../../helper/CreateFolder';
 
 export async function GET(request) {
   if (request.method !== 'GET') {
@@ -33,7 +34,7 @@ export async function POST(request) {
     }
    
     const repository = new Repository({
-      name:`${user.profile.username}/${name.trim()}`,
+      name:`${user._id.toString()}/${name.trim()}`,
       status,
       description,
       stars: 0,
@@ -42,6 +43,7 @@ export async function POST(request) {
       commits: []
     });
     
+    await CreateFolder(user._id.toString(),name.trim());
     await user.updateOne({ $push: { 'activity.repositories': repository.name } });
     await repository.save();
     return NextResponse.json({ message: 'Repository created successfully' },{ status: 201 });

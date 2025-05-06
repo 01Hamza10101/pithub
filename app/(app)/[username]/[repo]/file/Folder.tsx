@@ -1,134 +1,68 @@
+import { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import FolderIcon from "@/app/components/icons/icon-folder.svg";
-import FileIcon from "@/app/components/icons/icon-file.svg";
+import { useSelector, useDispatch } from "react-redux";
+import { AddStar, GetRepos } from "@/app/ReduxToolkit/ReduxSlice/User.Slice";
+
 import StarIcon from "@/app/components/icons/icon-star.svg";
 import StarredIcon from "@/app/components/icons/icon-Starred.svg";
-import CopyIcon from "@/app/components/icons/icon-Copy.svg";
-import DownloadIcon from "@/app/components/icons/icon-Download.svg";
-import PenIcon from "@/app/components/icons/icon-pen.svg";
 
-export function Folder() {
-  const filename = "/0101Hanzla01/PixelEarn.js";
-  const starred = true;
-  const Readme = [
-    "This is a Next.js project bootstrapped with create-next-app.",
-    "Getting Started",
-    "First, run the development server:",
-    "Open http:",
-    "You can start editing the page by modifying app/page.js. The page auto-updates as you edit the file.",
-    "This project uses next/font to automatically optimize and load Geist, a new font family for Vercel.",
-    "Learn More",
-  ];
+import { FolderTree } from "@/app/components/comp/FolderTreeNode";
+import { CodeEditor } from "./CodeEdit";
+
+export function Folder({repoName}:any) {
+  const dispatch = useDispatch();
+  const { folders, files, user, repositories } = useSelector((state: any) => state.User);
+
+  const [currentRepo, setCurrentRepo] = useState<any>();
+
+  const isStarred = useMemo(
+    () => user?.activity?.starred?.some((item: string) => `${item}/` === folders?.[0]) ?? false,
+    [user?.activity?.starred, folders]
+  );
+
+  useEffect(() => {
+    if (!Array.isArray(repositories)) {
+      dispatch(GetRepos({ repositories: user?.activity?.repositories }));
+    } else {
+      const repo = repositories.find((r: any) => r?.name === repoName);
+      if (repo) setCurrentRepo(repo);
+    }
+  }, [dispatch, repositories, user?.activity?.repositories, repoName]);
+
   return (
-    <div className="p-4">
-      <div className="flex">
-        <div className="p-3 flex">
-          <span className="font-bold">0101Hanzla023</span>
-          <span className="text-xs ml-2 h-6 border border-[#333] rounded-full px-3 py-1">
-            Public
+    <div className="p-4 bg-gray-900 text-gray-100 rounded-md shadow-md">
+      {currentRepo && (
+        <div className="flex items-center gap-4 p-3 border-b border-gray-700">
+          <span className="font-semibold text-lg">{repoName.split("/")[1]}</span>
+          <span className="h-6 rounded-lg flex justify-center items-center text-xs bg-blue-950 border-2 border-blue-800 px-3 py-1 font-semibold">
+            {currentRepo.status.toUpperCase()}
           </span>
-          <button className="ml-2 flex items-center gap-1 px-3 py-1 h-8 text-sm border border-[#333] rounded-md hover:bg-gray-900">
-            <Image src={starred ? StarredIcon : StarIcon} alt="Star" />
-            <span>Starred</span>
-            <span>({0})</span>
-          </button>
-          <div className="ml-2 px-3 py-1 rounded-md border border-[#333]">
-            Watched 0
-          </div>
-        </div>
-      </div>
-      <div className="flex">
-        <button className="px-3 mx-3 relative py-1 text-sm border border-[#333] rounded-md font-extralight hover:bg-gray-900">
-          main
-          <span className="ml-1 text-xs">▼</span>
-          <div className="flex absolute flex-col bg-black min-w-32 p-2 rounded-md hidden border border-[#333]">
-            <div className="hover:bg-gray-900 p-1 rounded-md">main</div>
-            <div className="hover:bg-gray-900 p-1 rounded-md">master</div>
-          </div>
-        </button>
-        <div className="ml-2 px-3 py-1 rounded-md border border-[#333]">
-          Branches 0
-        </div>
-        <button className="flex items-center gap-1 px-3 mx-3 relative py-1 text-sm border border-[#333] rounded-md font-extralight hover:bg-gray-900">
-          <span>Add file</span>
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+          <button
+            onClick={() => dispatch(AddStar({ name: repoName }))}
+            className={`flex items-center gap-1 rounded-md border border-gray-700 px-3 py-1 text-sm font-medium transition-colors duration-200 ${
+              isStarred
+                ? "bg-yellow-900 text-yellow-300 hover:bg-yellow-800 border-yellow-700"
+                : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+            }`}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 4v16m8-8H4"
-            />
-          </svg>
-          <div className="flex absolute flex-col bg-black min-w-32 p-2 rounded-md hidden border border-[#333]">
-            <div className="hover:bg-gray-700 p-1 rounded-md">
-              Create new file
-            </div>
-            <div className="hover:bg-gray-700 p-1 rounded-md">Upload files</div>
-          </div>
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
-        <Link href={`${filename}`}>
-          <div className="flex justify-between items-center p-2 border border-[#333] rounded-md hover:bg-gray-900 transition-shadow">
-            <div className="flex items-center">
-              <Image src={FolderIcon} alt="Folder" />
-              <span className="ml-2 text-sm hover:underline">comp</span>
-            </div>
-            <div className="text-sm">first commit</div>
-            <div className="text-sm">last week</div>
-          </div>
-        </Link>
-        <Link href={`${filename}`}>
-          <div className="flex justify-between items-center p-2 border border-[#333] rounded-md hover:bg-gray-900 transition-shadow">
-            <div className="flex items-center">
-              <Image src={FileIcon} alt="File" />
-              <span className="ml-2 text-sm hover:underline">index.js</span>
-            </div>
-            <div className="text-sm">first commit</div>
-            <div className="text-sm">last week</div>
-          </div>
-        </Link>
-      </div>
-      <div className="p-3 border border-[#333] rounded-md">
-        <div className="flex justify-between items-center pb-2 border-b-2 mb-2 border-[#333]">
-          <span className="font-bold">README</span>
-          <div className="flex">
-            <div className="flex justify-between items-center hover:bg-gray-900 cursor-pointer rounded-md border border-[#333]">
-              <Image
-                className="my-1 mx-2"
-                src={CopyIcon}
-                width={18}
-                height={18}
-                alt="Copy"
-              />
-              <Image
-                className="my-1 mx-2"
-                src={DownloadIcon}
-                width={26}
-                height={26}
-                alt="Download File"
-              />
-            </div>
-            <div className="flex justify-between items-center ml-2 hover:bg-gray-900 cursor-pointer rounded-md border border-[#333]">
-              <Image src={PenIcon} alt="Pen"/>
-            </div>
+            <Image src={isStarred ? StarredIcon : StarIcon} className="h-4 w-4" alt="Star" />
+            {isStarred ? "Starred" : "Star"}
+          </button>
+          <div className="rounded-md border border-gray-700 px-3 py-1 text-sm font-medium bg-gray-800">
+            Views <span className="font-semibold">{currentRepo.views}</span>
           </div>
         </div>
+      )}
 
-        {Readme.map((text, i) => {
-          return (
-            <div className="text-sm" key={i}>
-              {text}
-            </div>
-          );
-        })}
+      <div className="grid h-[calc(100vh-5rem)] grid-cols-1 gap-4 p-4 md:grid-cols-4">
+        <div className="col-span-1 max-h-full min-w-[180px] overflow-y-auto bg-gray-800 rounded-md shadow-sm border border-gray-700">
+          <div className="p-3 font-semibold border-b border-gray-700">Project Explorer</div>
+          <FolderTree folders={folders} files={files} repoName={repoName} />
+        </div>
+        <div className="col-span-3 overflow-hidden rounded-md shadow-md border border-gray-700 bg-gray-800">
+          <div className="bg-gray-700 p-3 font-semibold border-b border-gray-700">Code Editor</div>
+          <CodeEditor />
+        </div>
       </div>
     </div>
   );

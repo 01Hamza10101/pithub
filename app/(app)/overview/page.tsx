@@ -1,70 +1,63 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import ContributionGraph from "./graph"
-import ContributionActivity from "./activity"
-import ProfileNav from "@/app/components/comp/Profile"
+import Link from "next/link";
+import ContributionGraph from "./graph";
+import ContributionActivity from "./activity";
+import ProfileNav from "@/app/components/comp/Profile";
+import { useDispatch, useSelector } from "react-redux";
+import { Getcontributionrecords, GetRepos } from '@/app/ReduxToolkit/ReduxSlice/User.Slice';
+import { useEffect } from "react";
+import DashboardLayout from '@/app/components/comp/DashBoardLayout';
 
-interface ProfilePageProps {
-  params: {
-    username: string
-  }
-}
+export default function ProfilePage() {
+  const { contributionrecords, user, repositories } = useSelector((state: any) => state.User);
+  const dispatch = useDispatch<any>();
 
-export default function ProfilePage({ params }: ProfilePageProps) {
-  const { username } = params
+  useEffect(() => {
+    if (!user?.activity?.repositories) return;
+    dispatch(Getcontributionrecords({ repositories: user?.activity?.repositories }));
+    dispatch(GetRepos({ repositories: user.activity.repositories }));
+  }, [user?.activity?.repositories]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <div className="flex flex-col md:flex-row gap-8 overflow-x-hidden">
-        {/* Sidebar */}
-        <ProfileNav username={username} />
+    <DashboardLayout>
+      <div className="flex flex-col md:flex-row gap-6 w-full">
+        {/* Sidebar / Profile Navigation */}
+        <div className="md:w-1/3 w-full">
+          <ProfileNav />
+        </div>
 
-        {/* Main content */}
-        <div className="w-full space-y-6 min-w-0">
-          {/* Pinned repositories */}
-          <section>
-            <h2 className="text-base font-semibold mb-2">Pinned</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="border border-[#333] rounded-md p-4">
-                <div className="flex items-center gap-2">
-                  <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
-                    <path
-                      fillRule="evenodd"
-                      d="M2 2.5A2.5 2.5 0 014.5 0h8.75a.75.75 0 01.75.75v12.5a.75.75 0 01-.75.75h-2.5a.75.75 0 110-1.5h1.75v-2h-8a1 1 0 00-.714 1.7.75.75 0 01-1.072 1.05A2.495 2.495 0 012 11.5v-9zm10.5-1V9h-8c-.356 0-.694.074-1 .208V2.5a1 1 0 011-1h8zM5 12.25v3.25a.25.25 0 00.4.2l1.45-1.087a.25.25 0 01.3 0L8.6 15.7a.25.25 0 00.4-.2v-3.25a.25.25 0 00-.25-.25h-3.5a.25.25 0 00-.25.25z"
-                    />
-                  </svg>
-                  <Link href="/ShortCutForCODE" className="font-semibold hover:text-blue-600">
-                    ShortCutForCODE
-                  </Link>
-                  <span className="text-xs text-gray-600 border border-[#333] rounded-full px-2">Public</span>
-                </div>
-              </div>
-            </div>
+        {/* Main Content */}
+        <div className="space-y-6 w-full md:w-2/3">
+          {/* Contribution Graph Section */}
+          <section className="h-64 flex justify-center items-center bg-gray-900 rounded-md shadow-sm border border-gray-700 p-4">
+            {contributionrecords === undefined || contributionrecords === null ? (
+              <div className="text-xl text-gray-300">Loading...</div>
+            ) : contributionrecords.length > 0 ? (
+              <ContributionGraph data={contributionrecords} />
+            ) : (
+              <div className="text-xl text-gray-400">No contribution records found.</div>
+            )}
           </section>
 
-          {/* Contribution graph */}
-          <section>
-            <h2 className="text-sm text-gray-600 mb-2">
-              101 contributions in the last year
-            </h2>
-            <ContributionGraph />
-          </section>
-
-          {/* Contribution activity */}
-          <section>
+          {/* Contribution Activity Section */}
+          <section className="bg-gray-900 rounded-md shadow-sm border border-gray-700 p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold">Contribution activity</h2>
-              {/* <select className="text-sm border border-[#333] bg-black cursor-pointer rounded-md px-2 py-1">
-                <option defaultChecked>2025</option>
-                <option>2024</option>
-                <option>2023</option>
-              </select> */}
+              <h2 className="text-lg font-semibold text-white">Contribution Activity</h2>
+              {/* Optional link to GitHub or history */}
+              {/* <Link href="/activity" className="text-sm text-blue-500 hover:underline">See more</Link> */}
             </div>
-            <ContributionActivity />
+            {repositories.length > 0 ? (
+              <ContributionActivity
+                repositories={repositories}
+                contributionrecords={contributionrecords}
+              />
+            ) : (
+              <div className="text-gray-400">No recent repositories found.</div>
+            )}
           </section>
         </div>
       </div>
-    </div>
-  )
+    </DashboardLayout>
+  );
 }

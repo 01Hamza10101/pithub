@@ -18,7 +18,7 @@ export default function Header() {
   const [isMenuOpenLeft, setIsMenuOpenLeft] = useState(false);
   const [isMenuOpenRight, setIsMenuOpenRight] = useState(false);
   const router = useRouter();
-  const {profile} = useSelector((state) => state.User.user);
+  const {profile,activity} = useSelector((state) => state.User.user);
 
   const Logout = () => {
     localStorage.removeItem("token"); // Remove the token from local storage
@@ -31,25 +31,37 @@ export default function Header() {
     <header className="bg-gray-900 z-10 text-white">
       {/* Menu Bar  Left Menu Bar*/}
       <div
-        className={`h-screen absolute z-10 bg-gray-900 shadow-gray-800 shadow-xl ${
-          isMenuOpenLeft ? "min-w-72 px-4" : "w-0 overflow-hidden"
-        }`}
+  className={`h-screen fixed top-0 left-0 z-50 w-72 backdrop-blur-md bg-gray-800/70 shadow-lg transform transition-transform duration-300 ease-in-out ${
+    isMenuOpenLeft ? "translate-x-0" : "-translate-x-full"
+  } px-5 py-6`}
+>
+  {/* Header */}
+  <div className="flex justify-between items-center mb-6">
+    <h3 className="text-lg font-semibold text-white tracking-wide">Your Repos</h3>
+    <button
+      onClick={() => setIsMenuOpenLeft(false)}
+      className="p-1 rounded hover:bg-gray-700/60 transition"
+    >
+      <Image src={CancelIcon} alt="Close" className="w-5 h-5" />
+    </button>
+  </div>
+
+  {/* Repositories */}
+  <nav className="flex flex-col gap-3">
+    {activity?.repositories?.map((repo, index) => (
+      <Link
+        key={index}
+        href={`/${repo}`}
+        className="group flex items-center gap-3 px-3 py-2 rounded-md text-gray-200 bg-gray-700/40 hover:bg-blue-600 transition-all duration-200"
       >
-        <div className="flex justify-between p-2">
-          <div></div>
-          <div className="cursor-pointer hover:bg-gray-700 rounded">
-            <Image
-              src={CancelIcon}
-              onClick={() => setIsMenuOpenLeft(!isMenuOpenLeft)}
-              alt="Cancel"
-            />
-          </div>
-        </div>
-        <div className="flex p-2 hover:bg-gray-700 rounded-md cursor-pointer">
-          <div className="w-4 h-4 bg-gray-300 rounded-full"></div>
-          <div className="text-sm ml-2">01Hamza10101/EarnRewards</div>
-        </div>
+        <div className="w-2.5 h-2.5 bg-blue-400 rounded-full group-hover:bg-white transition" />
+        <span className="text-sm font-medium truncate">{repo.split('/').slice(1,2).join('/')}</span>
+      </Link>
+    ))}
+  </nav>
       </div>
+
+
       {/* Main navbar */}
       <div className="px-4 py-3">
         <div className="flex items-center justify-between">
@@ -64,19 +76,19 @@ export default function Header() {
             <div className="flex items-center space-x-2">
               <Image
                 src={MenuIcon}
-                onClick={() => setIsMenuOpenLeft(!isMenuOpenLeft)}
+                onClick={() => {setIsMenuOpenLeft(!isMenuOpenLeft);setIsMenuOpenRight(false)}}
                 alt="User avatar"
                 width={32}
                 height={32}
                 className="rounded hover:bg-gray-800 cursor-pointer"
               />
-              <span className="text-sm font-medium">01Hamzah10101</span>
+              <span className="text-sm font-medium">{profile?.username}</span>
             </div>
           </div>
 
           {/* Right section */}
           <div className="flex items-center space-x-4">
-            <div className="relative max-w-xl w-96 hidden md:block">
+            {/* <div className="relative max-w-xl w-96 hidden md:block">
               <input
                 type="search"
                 placeholder="Type / to search"
@@ -87,7 +99,7 @@ export default function Header() {
                   /
                 </kbd>
               </div>
-            </div>
+            </div> */}
             <Link className="p-1 hover:bg-gray-800 rounded-md" href={"/new"}>
               <svg
                 className="w-6 h-6"
@@ -104,7 +116,7 @@ export default function Header() {
               </svg>
               {/* <Image src={AddIcon} width={32} height={32} alt='new Repo'/> */}
             </Link>
-            <div className="w-8 h-8 rounded-full cursor-pointer" onClick={() => setIsMenuOpenRight(!isMenuOpenRight)}>
+            <div className="w-8 h-8 rounded-full cursor-pointer" onClick={() => {setIsMenuOpenRight(!isMenuOpenRight);setIsMenuOpenLeft(false)}}>
               <Image
                 src={profile?.url ? profile.url : ProfilceSvg}
                 alt="User profile"
@@ -184,45 +196,51 @@ export default function Header() {
       )} */}
       {/* Menu bar Right */}
       <div
-        className={`h-screen z-10 absolute top-0 right-0 bg-gray-900 shadow-gray-800 shadow-xl ${
-          isMenuOpenRight ? "min-w-72 px-4" : "w-0 overflow-hidden"
-        }`}
-      >
-        <div className="flex justify-between p-2">
-          <div></div>
-          <div className="cursor-pointer hover:bg-gray-700 rounded">
-            <Image
-              src={CancelIcon}
-              onClick={() => setIsMenuOpenRight(!isMenuOpenRight)}
-              alt="Cancel"
-            />
-          </div>
-        </div>
-        <Link
-          href={"/overview"}
-          className="flex p-2 hover:bg-gray-700 items-center rounded-md cursor-pointer"
-        >
-          <div className="w-5 h-5 rounded-full">
-            <Image src={ProfileIcon} alt="Profile icon" />
-          </div>
-          <div className="text-sm ml-2">Your profile</div>
-        </Link>
-        <Link
-          href={"/settings/profile"}
-          className="flex p-2 hover:bg-gray-700 items-center rounded-md cursor-pointer"
-        >
-          <div className="w-5 h-5 rounded-full">
-            <Image src={SettingIcon} alt="Profile icon" />
-          </div>
-          <div className="text-sm ml-2">Setting</div>
-        </Link>
-        <div className="flex p-2 hover:bg-gray-700 items-center rounded-md cursor-pointer" onClick={Logout} >
-          <div className="w-5 h-5 rounded-full">
-            <Image src={SignoutIcon} alt="Profile icon" />
-          </div>
-          <div className="text-sm ml-2">Sign out</div>
-        </div>
-      </div>
+  className={`h-screen fixed top-0 right-0 z-50 backdrop-blur-md bg-gray-800/70 shadow-xl border-l border-gray-800 transform transition-transform duration-300 ${
+    isMenuOpenRight ? "translate-x-0" : "translate-x-full"
+  } w-72 px-5 py-6`}
+>
+  {/* Close Button */}
+  <div className="flex justify-between items-center mb-6 w-full">
+    <h3 className="text-lg font-semibold text-white tracking-wide">
+      Settings
+    </h3>
+    <button
+      onClick={() => setIsMenuOpenRight(false)}
+      className="p-2 rounded-md hover:bg-gray-700/60 transition"
+    >
+      <Image src={CancelIcon} alt="Close" className="w-5 h-5" />
+    </button>
+  </div>
+
+  {/* Menu Items */}
+  <nav className="flex flex-col gap-3">
+    <Link
+      href="/overview"
+      className="group flex items-center gap-3 px-3 py-2 rounded-md text-gray-200 bg-gray-700/40 hover:bg-blue-600 transition-all duration-200"
+    >
+      <Image src={ProfileIcon} alt="Profile icon" className="w-5 h-5" />
+      <span className="text-sm font-medium">Your Profile</span>
+    </Link>
+
+    <Link
+      href="/settings/profile"
+      className="group flex items-center gap-3 px-3 py-2 rounded-md text-gray-200 bg-gray-700/40 hover:bg-blue-600 transition-all duration-200"
+    >
+      <Image src={SettingIcon} alt="Settings icon" className="w-5 h-5" />
+      <span className="text-sm font-medium">Settings</span>
+    </Link>
+
+    <button
+      onClick={Logout}
+      className="group flex items-center gap-3 px-3 py-2 rounded-md text-gray-200 bg-gray-700/40 hover:bg-blue-600 transition-all duration-200 hover:bg-red-600 transition w-full text-left"
+    >
+      <Image src={SignoutIcon} alt="Sign out icon" className="w-5 h-5" />
+      <span className="text-sm font-medium">Sign out</span>
+    </button>
+  </nav>
+</div>
+
     </header>
   );
 }

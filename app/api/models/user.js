@@ -7,7 +7,7 @@ const sessionSchema = new mongoose.Schema({
 
 const userSchema = new mongoose.Schema({
   profile: {
-    url: { type: String, required: true },
+    url: { type: String },
     username: { type: String, required: true, unique: true },
     name: { type: String, default: "" },
     email: { type: String, required: true, unique: true },

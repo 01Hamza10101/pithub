@@ -1,43 +1,84 @@
-export default function ContributionActivity() {
-    return (
-      <div className="space-y-4">
-        <div className="border-b pb-4">
-          <h3 className="font-semibold mb-2">January 2025</h3>
-          <div className="space-y-4">
-            <div className="flex items-start gap-2">
-              <svg className="w-4 h-4 mt-1" viewBox="0 0 16 16" fill="currentColor">
-                <path fillRule="evenodd" d="M2 2.5A2.5 2.5 0 014.5 0h8.75a.75.75 0 01.75.75v12.5a.75.75 0 01-.75.75h-2.5a.75.75 0 110-1.5h1.75v-2h-8a1 1 0 00-.714 1.7.75.75 0 01-1.072 1.05A2.495 2.495 0 012 11.5v-9zm10.5-1V9h-8c-.356 0-.694.074-1 .208V2.5a1 1 0 011-1h8zM5 12.25v3.25a.25.25 0 00.4.2l1.45-1.087a.25.25 0 01.3 0L8.6 15.7a.25.25 0 00.4-.2v-3.25a.25.25 0 00-.25-.25h-3.5a.25.25 0 00-.25.25z"/>
-              </svg>
-              <div>
-                <h4 className="font-semibold">Created 2 repositories</h4>
-                <ul className="text-sm space-y-2 mt-2">
-                  <li>
-                    <a href="#" className="text-blue-600 hover:underline">01Hamza10101/test</a>
-                    <span className="text-gray-600 text-xs ml-2">Jan 9</span>
+import Link from "next/link";
+import { format } from "date-fns";
+
+const formatDate = (dateStr, formatStr = "MMM d") =>
+  format(new Date(dateStr), formatStr);
+
+function groupByMonth(data, dateKey) {
+  const result = {};
+  (Array.isArray(data) ? data : []).forEach((item) => {
+    const date = new Date(item[dateKey]);
+    const month = format(date, "MMMM yyyy");
+
+    if (!result[month]) result[month] = [];
+    result[month].push(item);
+  });
+
+  return result;
+}
+
+
+export default function ContributionActivity({ repositories = [], contributionrecords = [] }) {
+  // Group repositories by creation month
+  const reposByMonth = groupByMonth(repositories, "createdAt");
+
+  // Group private contributions by month (if you want to)
+  const contribByMonth = {};
+
+  contributionrecords.forEach((record) => {
+    const repo = repositories.find((r) => r.name === record.name);
+    if (!repo) return;
+
+    const month = format(new Date(repo.createdAt), "MMMM yyyy");
+    const totalCommits = record.contributions.reduce((sum, c) => sum + c.count, 0);
+
+    if (!contribByMonth[month]) contribByMonth[month] = 0;
+    contribByMonth[month] += totalCommits;
+  });
+
+  // Merge all unique months
+  const allMonths = Array.from(
+    new Set([
+      ...Object.keys(reposByMonth),
+      ...Object.keys(contribByMonth),
+    ])
+  ).sort((a, b) => new Date(b) - new Date(a)); // newest first
+
+  return (
+    <div className="space-y-6">
+      {allMonths.map((month) => (
+        <div key={month} className="border-b border-b-gray-600 pb-4">
+          <h3 className="text-lg  mb-2">{month}</h3>
+
+          {/* Repository creations */}
+          {reposByMonth[month]?.length > 0 && (
+            <div className="mb-2">
+              <p className="">
+                {reposByMonth[month].length} {reposByMonth[month].length === 1 ? "repository" : "repositories"} created
+              </p>
+              <ul className="ml-4 mt-1 space-y-1 text-sm">
+                {reposByMonth[month].map((repo, index) => (
+                  <li key={index}>
+                    <Link href={`/${repo.name}`} className="text-blue-600 hover:underline">
+                      {repo.name}
+                    </Link>{" "}
+                    <span className="text-gray-500 text-xs">– {formatDate(repo.createdAt)}</span>
                   </li>
-                  <li>
-                    <a href="#" className="text-blue-600 hover:underline">01Hamza10101/RP</a>
-                    <span className="text-gray-600 text-xs ml-2">Jan 4</span>
-                  </li>
-                </ul>
-              </div>
+                ))}
+              </ul>
             </div>
-            <div className="flex items-start gap-2">
-              <svg className="w-4 h-4 mt-1" viewBox="0 0 16 16" fill="currentColor">
-                <path fillRule="evenodd" d="M4 4v2h-.25A1.75 1.75 0 002 7.75v5.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75 0 0014 13.25v-5.5A1.75 1.75 0 0012.25 6H12V4a4 4 0 10-8 0zm6.5 2V4a2.5 2.5 0 00-5 0v2h5zM12 7.5h.25a.25.25 0 01.25.25v5.5a.25.25 0 01-.25.25h-8.5a.25.25 0 01-.25-.25v-5.5a.25.25 0 01.25-.25H12z"/>
-              </svg>
-              <div>
-                <h4 className="font-semibold">2 contributions in private repositories</h4>
-                <p className="text-gray-600 text-sm mt-1">Jan 4 - Jan 5</p>
-              </div>
+          )}
+
+          {/* Private contributions */}
+          {contribByMonth[month] > 0 && (
+            <div>
+              <p>
+                {contribByMonth[month]} contribution{contribByMonth[month] > 1 ? "s" : ""} in private repositories
+              </p>
             </div>
-          </div>
+          )}
         </div>
-        <button className="text-blue-600 hover:underline text-sm">
-          Show more activity
-        </button>
-      </div>
-    )
-  }
-  
-  
+      ))}
+    </div>
+  );
+}

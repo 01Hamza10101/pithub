@@ -2,12 +2,12 @@ import dbConnect from "../../db/connectdb";
 import User from "../../models/user";
 import { NextResponse } from "next/server";
 import redis from "../../helper/redis";
-
+import { CreateFolder } from "../../helper/CreateFolder";
 export async function GET(request) {
   // if (request.method !== "GET") {
   //   return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
   // }
-
+  
   const { searchParams } = new URL(request.url);
   const otp = searchParams.get("otp");
   const email = searchParams.get("email");
@@ -50,6 +50,7 @@ export async function GET(request) {
         },
       });
 
+      await CreateFolder("",username);
       await newUser.save();
       await redis.del(`user:${email}`);
       return NextResponse.json(

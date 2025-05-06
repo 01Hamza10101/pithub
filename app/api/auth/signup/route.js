@@ -38,7 +38,7 @@ export async function POST(request) {
       "Your Verification Code",
       `<p>Your verification code is <b>${StoredOtp}</b>. It is valid for 5 minutes.</p>`
     );
-
+    console.log("Your OTP",StoredOtp)
     const hashedPassword = await bcrypt.hash(password, 10);
     
     await redis.json.set(`user:${email}`, '$', {

@@ -8,13 +8,13 @@ export async function verifyTokenFromRequest(req) {
   const token = authHeader?.split(' ')[1];
 
   if (!token) {
-    throw new Error('Token not found');
+    console.log('Token not found');
   }
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     return decoded;
   } catch (err) {
-    throw new Error('Invalid or expired token');
+    console.log('Invalid or expired token');
   }
 }

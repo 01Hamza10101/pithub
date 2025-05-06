@@ -1,6 +1,53 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
+
+// ✅ Move this OUTSIDE the Page component
+const InputField = ({
+  label,
+  name,
+  type = "password",
+  required = false,
+  placeholder,
+  value,
+  onChange,
+}: {
+  label: string;
+  name: string;
+  type?: string;
+  required?: boolean;
+  placeholder: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) => (
+  <div className="space-y-2">
+    <label htmlFor={name} className="block text-sm font-medium">
+      {label} {required && <span className="text-red-500">*</span>}
+    </label>
+    <input
+      type={type}
+      id={name}
+      name={name}
+      required={required}
+      value={value}
+      onChange={onChange}
+      className="w-full px-3 py-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 bg-gray-800 text-white focus:ring-blue-500"
+      placeholder={placeholder}
+    />
+  </div>
+);
+
+const defaultConfig = () => {
+  const accessToken = localStorage.getItem("token");
+  return {
+    headers: {
+      "Content-Type": "application/json" ,
+      Authorization: `Bearer ${accessToken}`,
+    },
+  };
+};
+
 
 export default function Page() {
   const [formData, setFormData] = useState({
@@ -14,48 +61,36 @@ export default function Page() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.newPassword !== formData.confirmPassword) {
       alert("New password and confirm password do not match!");
       return;
     }
-    // Add your API call or update logic here
-    alert("Password updated successfully!");
-  };
 
-  const InputField = ({
-    label,
-    name,
-    type = "password",
-    required = false,
-    placeholder,
-  }: {
-    label: string;
-    name: string;
-    type?: string;
-    required?: boolean;
-    placeholder: string;
-  }) => (
-    <div className="mb-4">
-      <label
-        htmlFor={name}
-        className="block text-sm font-medium text-gray-100 mb-1"
-      >
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
-      <input
-        type={type}
-        id={name}
-        name={name}
-        required={required}
-        value={(formData as any)[name]}
-        onChange={handleChange}
-        className="w-full max-w-xs px-3 py-2 bg-gray-900 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400"
-        placeholder={placeholder}
-      />
-    </div>
-  );
+    try {
+      const res = await fetch("/api/settings/update-password", {
+        method: "POST",...defaultConfig(),
+        body: JSON.stringify({
+          oldPassword: formData.oldPassword,
+          newPassword: formData.newPassword,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.error || "Something went wrong");
+        return;
+      }
+
+      alert("Password updated successfully!");
+      setFormData({ oldPassword: "", newPassword: "", confirmPassword: "" });
+    } catch (error) {
+      console.error(error);
+      alert("An error occurred. Please try again later.");
+    }
+  };
 
   return (
     <div className="flex p-4">
@@ -63,46 +98,43 @@ export default function Page() {
         onSubmit={handleSubmit}
         className="w-full max-w-sm p-6 rounded-md shadow-md space-y-4"
       >
-        {/* Old Password */}
         <InputField
           label="Old Password"
           name="oldPassword"
           required
           placeholder="Enter your old password"
+          value={formData.oldPassword}
+          onChange={handleChange}
         />
-
-        {/* New Password */}
         <InputField
           label="New Password"
           name="newPassword"
           required
           placeholder="Enter your new password"
+          value={formData.newPassword}
+          onChange={handleChange}
         />
-
-        {/* Confirm Password */}
         <InputField
           label="Confirm New Password"
           name="confirmPassword"
           required
           placeholder="Confirm your new password"
+          value={formData.confirmPassword}
+          onChange={handleChange}
         />
-
-        {/* Update Password Button */}
         <button
           type="submit"
           className="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
         >
           Update Password
         </button>
-
-        {/* Forgot Password Link */}
         <div className="text-center">
-          <a
-            href="/forgot-password"
+          <Link
+            href="/password_reset"
             className="text-blue-600 hover:underline text-sm"
           >
             Forgot Password?
-          </a>
+          </Link>
         </div>
       </form>
     </div>

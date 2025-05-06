@@ -21,7 +21,7 @@ export default function Page() {
         sessions?.map(({ ip ,location}: any, i: number) => {
 
           return (
-            <div key={i} className="flex items-center justify-between max-w-md rounded-md border border-gray-500 mt-6 p-4 shadow-sm space-x-4">
+            <div key={i} className="flex items-center justify-between max-w-md rounded-md border border-gray-500 bg-gray-800 mt-6 p-4 shadow-sm space-x-4">
               <div className="flex-shrink-0 w-3 h-3 bg-green-700 rounded-full" title="Active Session"></div>
               <div className="flex-shrink-0">
                 <Image src={LaptopIcon} alt="Laptop" width={32} height={32} />
